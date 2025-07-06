@@ -1,6 +1,9 @@
 ﻿using Mono.Cecil;
-using Gee.External.Capstone;
-using Gee.External.Capstone.Arm64;
+using Iced.Intel;
+using System.Diagnostics;
+using System.Net;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace FbsDumper;
 
@@ -8,55 +11,55 @@ internal class InstructionsParser
 {
 	string gameAssemblyPath;
 	byte[] fileBytes;
+	ByteArrayCodeReader codeReader;
 
 	public InstructionsParser(string _gameAssemblyPath)
 	{
 		gameAssemblyPath = _gameAssemblyPath;
 		fileBytes = File.ReadAllBytes(gameAssemblyPath);
+		codeReader = new ByteArrayCodeReader(fileBytes);
 	}
 
-	public List<Arm64Instruction> GetInstructions(MethodDefinition targetMethod, bool debug = false)
+	public List<Instruction> GetInstructions(MethodDefinition targetMethod, bool debug = false)
 	{
 		long rva = GetMethodRVA(targetMethod);
+		long offset = GetMethodOffset(targetMethod);
 		if (rva == 0)
 		{
 			Console.WriteLine($"[!] Invalid RVA or offset for method: {targetMethod.FullName}");
-			return new List<Arm64Instruction>();
+			return new List<Instruction>();
 		}
 
-		return GetInstructions(rva, debug);
+		return GetInstructions(rva, offset, debug);
 	}
 
-	public List<Arm64Instruction> GetInstructions(long RVA, bool debug = false)
+	public List<Instruction> GetInstructions(long RVA, long Offset, bool debug = false)
 	{
-		var instructions = new List<Arm64Instruction>();
+		codeReader.Position = (int)Offset;
+		var decoder = Iced.Intel.Decoder.Create(IntPtr.Size * 8, codeReader);
+		decoder.IP = (ulong)RVA;
+		var instructions = new List<Instruction>();
 
-		using var capstone = CapstoneDisassembler.CreateArm64Disassembler(Arm64DisassembleMode.LittleEndian);
-		capstone.EnableInstructionDetails = true;
-		const int instrSize = 4;
-		long currentOffset = RVA;
+		//Console.WriteLine($"{codeReader.Position:X} {decoder.IP:X}");
 
-		while (currentOffset + instrSize <= fileBytes.Length)
+		while (true)
 		{
-			var instrBytes = new byte[instrSize];
-			Array.Copy(fileBytes, currentOffset, instrBytes, 0, instrSize);
-
-			var decoded = capstone.Disassemble(instrBytes, currentOffset);
-			if (decoded.Length == 0)
-				break;
-
-			var instr = decoded[0];
-			instructions.Add(instr);
-
+			var instruction = decoder.Decode();
 			if (debug)
-				Console.WriteLine($"\t0x{instr.Address:X}: {instr.Mnemonic} {instr.Operand}");
+			{
+				string instructionStr = instruction.ToString();
 
-			currentOffset += instrSize;
+				Console.WriteLine($"{instruction.IP} | {instructionStr}");
+			}
 
-			if (instr.Mnemonic == "ret")
+			instructions.Add(instruction);
+
+			if (instruction.Mnemonic == Mnemonic.Ret)
+			{
 				break;
+			}
 		}
-
+			
 		return instructions;
 	}
 
@@ -71,6 +74,20 @@ internal class InstructionsParser
 			return 0;
 
 		var argRVA = customAttr.Fields.First(f => f.Name == "RVA");
+		long rva = Convert.ToInt64(argRVA.Argument.Value.ToString()?.Substring(2), 16);
+		return rva;
+	}
+
+	public static long GetMethodOffset(MethodDefinition method)
+	{
+		if (!method.HasCustomAttributes)
+			return 0;
+
+		var customAttr = method.CustomAttributes.FirstOrDefault(a => a.AttributeType.Name == "AddressAttribute");
+		if (customAttr == null || !customAttr.HasFields)
+			return 0;
+
+		var argRVA = customAttr.Fields.First(f => f.Name == "Offset");
 		long rva = Convert.ToInt64(argRVA.Argument.Value.ToString()?.Substring(2), 16);
 		return rva;
 	}

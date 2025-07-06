@@ -13,7 +13,7 @@ public class MainApp
 	public static readonly string? NameSpace2LookFor = null; // can also be MX.Data.Excel or FlatData to specify different namespaces
 	private static readonly string FlatBaseType = "FlatBuffers.IFlatbufferObject";
     private static readonly string DummyAssemblyDir = "DummyDll";
-	public static readonly string LibIl2CppPath = "libil2cpp.so"; // change it to the actual path
+	public static readonly string LibIl2CppPath = "GameAssembly.dll"; // change it to the actual path
 	private static readonly string OutputFileName = "BlueArchive.fbs";
     public static FlatBufferBuilder flatBufferBuilder;
     public static List<TypeDefinition> flatEnumsToAdd = new List<TypeDefinition>(); // for GetAllFlatBufferTypes -> getting enums part
@@ -35,8 +35,8 @@ public class MainApp
         int done = 0;
 		foreach (TypeDefinition typeDef in typeDefs)
 		{
-			Console.Write($"Disassembling types ({done+1}/{typeDefs.Count})...      \r");
-			FlatTable? table = typeHelper.Type2Table(typeDef);
+            Console.Write($"Disassembling types ({done+1}/{typeDefs.Count})...      \r");
+            FlatTable? table = typeHelper.Type2Table(typeDef);
             if (table == null)
             {
                 Console.WriteLine($"[ERR] Error dumping table for {typeDef.FullName}");
