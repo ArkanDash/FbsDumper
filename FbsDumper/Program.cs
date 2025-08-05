@@ -8,7 +8,7 @@ namespace FbsDumper;
 public class MainApp
 {
     private static string DummyAssemblyDir = "DummyDll";
-	public static string LibIl2CppPath = "GameAssembly.dll"; // change it to the actual path
+	public static string GameAssemblyPath = "GameAssembly.dll"; // change it to the actual path
 	private static string OutputFileName = "BlueArchive.fbs";
     private static string? CustomNameSpace = "FlatData"; // can also be String.Empty, "", or null to not specify namespace
     public static bool ForceSnakeCase = false;
@@ -22,7 +22,7 @@ public class MainApp
         var parsedArgs = Args.Parse<FbsDumperArgs>(args);
 
         DummyAssemblyDir = parsedArgs.DummyDll ?? "DummyDll";
-        LibIl2CppPath = parsedArgs.GameAssembly ?? "GameAssembly.dll";
+        GameAssemblyPath = parsedArgs.GameAssembly ?? "GameAssembly.dll";
         OutputFileName = parsedArgs.OutputFile ?? "BlueArchive.fbs";
         CustomNameSpace = parsedArgs.Namespace ?? "FlatData";
         NameSpace2LookFor = parsedArgs.NamespaceToLookFor ?? null;

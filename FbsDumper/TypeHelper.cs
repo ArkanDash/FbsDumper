@@ -7,7 +7,7 @@ namespace FbsDumper;
 
 internal class TypeHelper
 {
-    private InstructionsParser instructionsResolver = new InstructionsParser(MainApp.LibIl2CppPath);
+    private InstructionsParser instructionsResolver = new InstructionsParser(MainApp.GameAssemblyPath);
 
 	public List<TypeDefinition> GetAllFlatBufferTypes(ModuleDefinition module, string baseTypeName)
     {
