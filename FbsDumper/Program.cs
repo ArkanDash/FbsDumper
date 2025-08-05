@@ -1,8 +1,7 @@
 ﻿using Mono.Cecil;
 using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using System;
+using PowerArgs;
 
 namespace FbsDumper;
 
@@ -19,11 +18,32 @@ public class MainApp
 
     public static void Main(string[] args)
     {
+        var parsedArgs = Args.Parse<FbsDumperArgs>(args);
+
+        DummyAssemblyDir = parsedArgs.DummyDll ?? "DummyDll";
+        OutputFileName = parsedArgs.OutputFile ?? "BlueArchive.fbs";
+        CustomNameSpace = parsedArgs.Namespace ?? "FlatData";
+        NameSpace2LookFor = parsedArgs.NamespaceToLookFor ?? null;
+        ForceSnakeCase = parsedArgs.ForceSnakeCase;
+
+        if (!Directory.Exists(parsedArgs.DummyDll))
+        {
+            Console.WriteLine($"[ERR] Dummy assembly directory '{parsedArgs.DummyDll}' not found.");
+            Environment.Exit(1);
+        }
+
         DefaultAssemblyResolver resolver = new DefaultAssemblyResolver();
         resolver.AddSearchDirectory(DummyAssemblyDir);
         ReaderParameters readerParameters = new ReaderParameters();
         readerParameters.AssemblyResolver = resolver;
-        AssemblyDefinition asm = AssemblyDefinition.ReadAssembly(Path.Combine(DummyAssemblyDir, "BlueArchive.dll"), readerParameters);
+
+        string blueArchiveDllPath = Path.Combine(DummyAssemblyDir, "BlueArchive.dll");
+        if (!File.Exists(blueArchiveDllPath))
+        {
+            Console.WriteLine($"[ERR] BlueArchive.dll not found in '{DummyAssemblyDir}'.");
+            Environment.Exit(1);
+        }
+        AssemblyDefinition asm = AssemblyDefinition.ReadAssembly(blueArchiveDllPath, readerParameters);
 
         List<TypeDefinition> typeDefs = TypeHelper.GetAllFlatBufferTypes(asm.MainModule, FlatBaseType);
         FlatSchema schema = new FlatSchema();
@@ -49,8 +69,8 @@ public class MainApp
             }
             schema.flatEnums.Add(fEnum);
         }
-
         File.WriteAllText(OutputFileName, SchemaToString(schema));
+        Console.WriteLine($"[INFO] Saved the schema to {OutputFileName}");
     }
 
     private static string SchemaToString(FlatSchema schema)
