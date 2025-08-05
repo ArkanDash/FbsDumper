@@ -396,3 +396,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Game files
+DummyDll*
+GameAssembly.dll
+libil2cpp.so
+*.fbs

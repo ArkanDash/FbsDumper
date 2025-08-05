@@ -1,0 +1,73 @@
+name: Build FbsDumperv2
+
+on:
+  push:
+    branches: [ pc-client ]
+  pull_request:
+    branches: [ pc-client ]
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    
+    strategy:
+      matrix:
+        include:
+          - os: windows
+            arch: x86_64
+            runner: windows-latest
+            rid: win-x64
+          - os: macos
+            arch: x86_64
+            runner: macos-13
+            rid: osx-x64
+          - os: macos
+            arch: aarch64
+            runner: macos-latest
+            rid: osx-arm64
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+            rid: linux-x64
+          - os: linux
+            arch: aarch64
+            runner: ubuntu-latest
+            rid: linux-arm64
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    - name: Publish
+      run: dotnet publish --configuration Release --runtime ${{ matrix.rid }} --self-contained true --output ./publish/${{ matrix.rid }}
+
+    - name: Create release archive (Windows)
+      if: matrix.os == 'windows'
+      run: |
+        cd publish/${{ matrix.rid }}
+        Compress-Archive -Path * -DestinationPath ../../${{ github.event.repository.name }}-${{ matrix.rid }}.zip
+    - name: Create release archive (Unix)
+      if: matrix.os != 'windows'
+      run: |
+        cd publish/${{ matrix.rid }}
+        zip -r ../../${{ github.event.repository.name }}-${{ matrix.rid }}.zip *
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}-${{ matrix.rid }}
+        path: ${{ github.event.repository.name }}-${{ matrix.rid }}.zip
