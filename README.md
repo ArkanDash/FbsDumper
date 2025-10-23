@@ -8,7 +8,7 @@ A tool to recover FlatBuffer schema definitions from game assemblies with assemb
 
 You can download the latest pre-build binaries at [Releases](https://github.com/ArkanDash/FbsDumper/releases)
 
-[Windows](https://github.com/ArkanDash/FbsDumper/releases/latest/download/FbsDumper-v2.1.0-win-x64.zip) | [Linux](https://github.com/ArkanDash/FbsDumper/releases/latest/download/FbsDumper-v2.1.0-linux-x64.zip) | [MacOS](https://github.com/ArkanDash/FbsDumper/releases/latest/download/FbsDumper-v2.1.0-osx-arm64.zip) 
+[Windows](https://github.com/ArkanDash/FbsDumper/releases/latest/download/FbsDumper-win-x64.zip) | [Linux](https://github.com/ArkanDash/FbsDumper/releases/latest/download/FbsDumper-linux-x64.zip) | [MacOS](https://github.com/ArkanDash/FbsDumper/releases/latest/download/FbsDumper-osx-arm64.zip) 
 
 
 ## Usage
