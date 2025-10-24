@@ -144,7 +144,6 @@ public static class FieldParser
 
         var newGenericInstance = (GenericInstanceType)fieldTypeRef;
         fieldType = newGenericInstance.GenericArguments.First().Resolve();
-        fieldTypeRef = newGenericInstance.GenericArguments.First();
         field.Type = fieldType;
 
         return fieldType;

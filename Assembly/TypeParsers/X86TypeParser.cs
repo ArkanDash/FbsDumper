@@ -134,7 +134,6 @@ internal class X86TypeParser : ITypeParser
                         continue;
                     }
 
-                    var edxAsInt = ParseEdxValue(call);
                     ret.Add(fieldIndex, parameter);
                     seenParameterIndices.Add(paramIndex);
                     fieldIndex++; 
