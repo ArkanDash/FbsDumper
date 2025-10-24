@@ -5,6 +5,7 @@ using FbsDumper.Helpers;
 using FbsDumper.Instructions;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using ZLinq;
 
 namespace FbsDumper.Assembly;
 
@@ -37,17 +38,17 @@ internal static class TypeHelper
     {
         List<TypeDefinition> ret =
         [
-            .. module.GetTypes().Where(t =>
+            .. module.GetTypes().AsValueEnumerable().Where(t =>
                 t.HasInterfaces &&
                 t.Interfaces.Any(i => i.InterfaceType.FullName == baseTypeName)
-            )
+            ).ToArray()
         ];
 
         if (!string.IsNullOrEmpty(Parser.NameSpace2LookFor))
-            ret = [.. ret.Where(t => t.Namespace == Parser.NameSpace2LookFor)];
+            ret = [.. ret.AsValueEnumerable().Where(t => t.Namespace == Parser.NameSpace2LookFor).ToArray()];
 
         // Dedupe
-        ret = [..ret.DistinctBy(t => t.Name)];
+        ret = [..ret.AsValueEnumerable().DistinctBy(t => t.Name).ToArray()];
 
         return ret;
     }
@@ -100,7 +101,7 @@ internal static class TypeHelper
         var retType = typeDef.GetEnumUnderlyingType().Resolve();
         var ret = new FlatEnum(retType, typeDef.Name);
 
-        foreach (var fieldDef in typeDef.Fields.Where(f => f.HasConstant))
+        foreach (var fieldDef in typeDef.Fields.AsValueEnumerable().Where(f => f.HasConstant))
         {
             var enumField = new FlatEnumField(fieldDef.Name, Convert.ToInt64(fieldDef.Constant));
             ret.Fields.Add(enumField);

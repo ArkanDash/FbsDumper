@@ -4,6 +4,7 @@ using FbsDumper.Helpers;
 using FbsDumper.Instructions;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using ZLinq;
 
 namespace FbsDumper.Assembly.TypeParsers;
 
@@ -23,7 +24,7 @@ internal class X86TypeParser : ITypeParser
             return;
         }
 
-        dict = dict.OrderBy(t => t.Key).ToDictionary();
+        dict = dict.AsValueEnumerable().OrderBy(t => t.Key).ToDictionary();
 
         foreach (var kvp in dict)
         {

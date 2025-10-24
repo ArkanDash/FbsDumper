@@ -4,6 +4,7 @@ using FbsDumper.Helpers;
 using FbsDumper.Instructions;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using ZLinq;
 
 namespace FbsDumper.Assembly.TypeParsers;
 
@@ -12,7 +13,7 @@ internal class ArmTypeParser : ITypeParser
     public void ProcessFields(ref FlatTable ret, MethodDefinition createMethod, TypeDefinition targetType)
     {
         var dict = ParseCallsForCreateMethod(createMethod, targetType);
-        dict = dict.OrderBy(t => t.Key).ToDictionary();
+        dict = dict.AsValueEnumerable().OrderBy(t => t.Key).ToDictionary();
 
         foreach (var kvp in dict)
         {

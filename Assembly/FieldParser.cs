@@ -1,6 +1,7 @@
 ﻿using FbsDumper.CLI;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using ZLinq;
 
 namespace FbsDumper.Assembly;
 
@@ -83,7 +84,7 @@ public static class FieldParser
 
     public static void ForceProcessFields(ref FlatTable ret, MethodDefinition createMethod, TypeDefinition targetType)
     {
-        foreach (var (param, offset) in createMethod.Parameters.Skip(1).Select((p, i) => (p, i + 1)))
+        foreach (var (param, offset) in createMethod.Parameters.AsValueEnumerable().Skip(1).Select((p, i) => (p, i + 1)))
         {
             var fieldType = param.ParameterType.Resolve();
             var fieldTypeRef = param.ParameterType;
@@ -107,7 +108,7 @@ public static class FieldParser
 
     public static void ProcessFieldsByMethods(ref FlatTable ret, TypeDefinition targetType)
     {
-        foreach (var method in targetType.GetMethods().Where(m =>
+        foreach (var method in targetType.GetMethods().AsValueEnumerable().Where(m =>
                      m.IsPublic && m.IsStatic && m.Name.StartsWith("Add") && m.HasParameters &&
                      m.Parameters.Count == 2 && m.Parameters.First().Name == "builder"))
         {

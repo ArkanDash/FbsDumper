@@ -2,6 +2,7 @@ using AsmArm64;
 using FbsDumper.Helpers;
 using Iced.Intel;
 using Mono.Cecil;
+using ZLinq;
 
 namespace FbsDumper.Instructions;
 
@@ -193,8 +194,7 @@ internal class InstructionsParser
         if (instruction.Operands.Count == 0)
             return string.Empty;
 
-        var operands = instruction.Operands.Select(operand => operand.ToString()).ToList();
-        return string.Join(", ", operands);
+        return instruction.Operands.AsValueEnumerable().Select(operand => operand.ToString()).JoinToString(", ");
     }
 
     public static long GetMethodRva(MethodDefinition method)
@@ -242,8 +242,7 @@ internal record InstructionWithAddress(Arm64Instruction? Instruction, ulong Addr
             if (Instruction.Value.Operands.Count == 0)
                 return null;
 
-            var operands = Instruction.Value.Operands.Select(operand => operand.ToString()).ToList();
-            return string.Join(", ", operands);
+            return Instruction.Value.Operands.AsValueEnumerable().Select(operand => operand.ToString()).JoinToString(", ");
         }
     }
 }

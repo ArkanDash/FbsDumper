@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Iced.Intel;
+using ZLinq;
 
 namespace FbsDumper.Instructions.Analyzers;
 
@@ -21,7 +22,7 @@ internal partial class X86Analyzer : IInstructionAnalyzer
 
         InitializeParameterRegisters(regState);
 
-        foreach (var instr in instructions.Select(instrWithAddr => instrWithAddr.X86Instruction))
+        foreach (var instr in instructions.AsValueEnumerable().Select(instrWithAddr => instrWithAddr.X86Instruction))
         {
             tick++;
 
@@ -85,7 +86,7 @@ internal partial class X86Analyzer : IInstructionAnalyzer
     {
         ulong allocation = 0;
 
-        foreach (var instr in instructions.Select(instrWithAddr => instrWithAddr.X86Instruction))
+        foreach (var instr in instructions.AsValueEnumerable().Select(instrWithAddr => instrWithAddr.X86Instruction))
             if (instr.Mnemonic == Mnemonic.Push)
                 allocation += StackSlotSize;
             else if (IsStackPointerSubtraction(instr))
