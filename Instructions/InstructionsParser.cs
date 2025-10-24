@@ -21,14 +21,14 @@ internal class InstructionsParser
     private readonly ByteArrayCodeReader? _codeReader;
     private readonly byte[] _fileBytes;
 
-    public Architecture Architecture { get; }
-
     public InstructionsParser(string gameAssemblyPath)
     {
         _fileBytes = File.ReadAllBytes(gameAssemblyPath);
         Architecture = DetectArchitecture(gameAssemblyPath);
         _codeReader = Architecture == Architecture.X86 ? new ByteArrayCodeReader(_fileBytes) : null;
     }
+
+    public Architecture Architecture { get; }
 
     private static Architecture DetectArchitecture(string gameAssemblyPath)
     {
@@ -191,10 +191,9 @@ internal class InstructionsParser
 
     private static string GetOperandString(Arm64Instruction instruction)
     {
-        if (instruction.Operands.Count == 0)
-            return string.Empty;
-
-        return instruction.Operands.AsValueEnumerable().Select(operand => operand.ToString()).JoinToString(", ");
+        return instruction.Operands.Count == 0
+            ? string.Empty
+            : instruction.Operands.AsValueEnumerable().Select(operand => operand.ToString()).JoinToString(", ");
     }
 
     public static long GetMethodRva(MethodDefinition method)
@@ -239,10 +238,10 @@ internal record InstructionWithAddress(Arm64Instruction? Instruction, ulong Addr
         get
         {
             if (Instruction == null) return X86Instruction.ToString();
-            if (Instruction.Value.Operands.Count == 0)
-                return null;
-
-            return Instruction.Value.Operands.AsValueEnumerable().Select(operand => operand.ToString()).JoinToString(", ");
+            return Instruction.Value.Operands.Count == 0
+                ? null
+                : Instruction.Value.Operands.AsValueEnumerable().Select(operand => operand.ToString())
+                    .JoinToString(", ");
         }
     }
 }

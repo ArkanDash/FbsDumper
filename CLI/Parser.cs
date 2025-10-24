@@ -127,7 +127,8 @@ public static partial class Parser
         }
 
         Log.Info("Adding enums...");
-        foreach (var fEnum in FlatEnumsToAdd.AsValueEnumerable().Select(TypeHelper.TypeToEnum)) schema.FlatEnums.Add(fEnum);
+        foreach (var fEnum in FlatEnumsToAdd.AsValueEnumerable().Select(TypeHelper.TypeToEnum))
+            schema.FlatEnums.Add(fEnum);
 
         Log.Info($"Writing schema to {_outputFileName}...");
 

@@ -84,7 +84,8 @@ public static class FieldParser
 
     public static void ForceProcessFields(ref FlatTable ret, MethodDefinition createMethod, TypeDefinition targetType)
     {
-        foreach (var (param, offset) in createMethod.Parameters.AsValueEnumerable().Skip(1).Select((p, i) => (p, i + 1)))
+        foreach (var (param, offset) in createMethod.Parameters.AsValueEnumerable().Skip(1)
+                     .Select((p, i) => (p, i + 1)))
         {
             var fieldType = param.ParameterType.Resolve();
             var fieldTypeRef = param.ParameterType;
